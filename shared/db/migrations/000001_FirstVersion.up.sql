@@ -1,0 +1,13 @@
+CREATE TABLE IF NOT EXISTS "user" (
+    user_id SERIAL PRIMARY KEY,
+    password VARCHAR(100) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS unlock (
+    unlock_id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL,
+    expires_at TIMESTAMP NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES "user"(user_id) ON DELETE CASCADE
+);

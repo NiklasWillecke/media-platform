@@ -12,7 +12,7 @@ import (
 
 	"github.com/jackc/pgx/v5"
 
-	db "github.com/niklaswillecke/streaming-platform/shared/db/generated"
+	db "streaming-platform/shared/db/generated"
 )
 
 // 1. Checks if Video url is valid

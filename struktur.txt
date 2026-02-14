@@ -1,0 +1,335 @@
+streaming-platform/
+├── .github/
+│   ├── workflows/
+│   │   ├── build-and-test.yml           # CI für alle Services
+│   │   ├── deploy-staging.yml           # Auto-Deploy zu Staging
+│   │   ├── deploy-production.yml        # Manual Deploy zu Prod
+│   │   └── security-scan.yml            # Trivy, Dependabot
+│   └── CODEOWNERS
+│
+├── services/                             # Alle Microservices
+│   ├── api-gateway/                      # Load Balancer + Presigned URLs
+│   │   ├── cmd/
+│   │   │   └── main.go
+│   │   ├── internal/
+│   │   │   ├── auth/                     # JWT Validation
+│   │   │   │   ├── jwt.go
+│   │   │   │   └── jwt_test.go
+│   │   │   ├── router/                   # Request Routing Logic
+│   │   │   │   ├── router.go             # Node Selection
+│   │   │   │   ├── cache_aware.go        # Cache-Index Integration
+│   │   │   │   └── router_test.go
+│   │   │   ├── signer/                   # HMAC Presigned URLs
+│   │   │   │   ├── signer.go
+│   │   │   │   └── signer_test.go
+│   │   │   └── middleware/
+│   │   │       ├── rate_limit.go
+│   │   │       ├── logging.go
+│   │   │       └── metrics.go
+│   │   ├── pkg/
+│   │   │   └── models/
+│   │   │       └── request.go
+│   │   ├── configs/
+│   │   │   └── config.yaml
+│   │   ├── Dockerfile
+│   │   ├── Makefile
+│   │   ├── go.mod
+│   │   ├── go.sum
+│   │   └── README.md
+│   │
+│   ├── streaming-service/                # Streaming Server mit Cache
+│   │   ├── cmd/
+│   │   │   └── main.go
+│   │   ├── internal/
+│   │   │   ├── cache/
+│   │   │   │   ├── memory.go             # L1 RAM Cache
+│   │   │   │   ├── disk.go               # L2 NVMe Cache
+│   │   │   │   ├── eviction.go           # LRU Eviction
+│   │   │   │   └── cache_test.go
+│   │   │   ├── prefetch/
+│   │   │   │   ├── prefetcher.go
+│   │   │   │   └── strategy.go
+│   │   │   ├── storage/
+│   │   │   │   ├── r2.go                 # Cloudflare R2 Client
+│   │   │   │   ├── storagebox.go         # Hetzner Storage Box
+│   │   │   │   └── storage_test.go
+│   │   │   ├── verifier/
+│   │   │   │   └── signature.go          # HMAC Verification
+│   │   │   └── metrics/
+│   │   │       └── prometheus.go
+│   │   ├── Dockerfile
+│   │   ├── go.mod
+│   │   └── README.md
+│   │
+│   ├── upload-service/                   # Upload Handler
+│   │   ├── cmd/
+│   │   │   └── main.go
+│   │   ├── internal/
+│   │   │   ├── uploader/
+│   │   │   │   ├── multipart.go
+│   │   │   │   ├── validator.go          # File Validation
+│   │   │   │   └── uploader_test.go
+│   │   │   ├── queue/
+│   │   │   │   ├── nats.go               # NATS Publisher
+│   │   │   │   └── redis.go              # Redis Queue
+│   │   │   └── auth/
+│   │   │       └── jwt.go                # JWT Validation
+│   │   ├── Dockerfile
+│   │   ├── go.mod
+│   │   └── README.md
+│   │
+│   ├── ffmpeg-worker/                    # Transcoding Worker
+│   │   ├── cmd/
+│   │   │   └── main.go
+│   │   ├── internal/
+│   │   │   ├── transcoder/
+│   │   │   │   ├── ffmpeg.go
+│   │   │   │   ├── hls.go                # HLS Packaging
+│   │   │   │   └── transcoder_test.go
+│   │   │   ├── queue/
+│   │   │   │   └── consumer.go           # NATS Consumer
+│   │   │   └── storage/
+│   │   │       └── uploader.go           # Upload zu R2
+│   │   ├── Dockerfile
+│   │   ├── go.mod
+│   │   └── README.md
+│   │
+│   ├── cache-index-service/              # Cache Status Tracker
+│   │   ├── cmd/
+│   │   │   └── main.go
+│   │   ├── internal/
+│   │   │   ├── index/
+│   │   │   │   ├── redis.go              # Redis-backed Index
+│   │   │   │   ├── index.go
+│   │   │   │   └── index_test.go
+│   │   │   ├── api/
+│   │   │   │   ├── handlers.go           # HTTP API
+│   │   │   │   └── grpc.go               # gRPC API (optional)
+│   │   │   └── sync/
+│   │   │       └── heartbeat.go          # Node Heartbeat Handler
+│   │   ├── Dockerfile
+│   │   ├── go.mod
+│   │   └── README.md
+│   │
+│   ├── auth-service/                     # Authentication & Authorization
+│   │   ├── cmd/
+│   │   │   └── main.go
+│   │   ├── internal/
+│   │   │   ├── auth/
+│   │   │   │   ├── login.go
+│   │   │   │   ├── register.go
+│   │   │   │   ├── jwt.go
+│   │   │   │   └── refresh.go
+│   │   │   ├── user/
+│   │   │   │   ├── repository.go         # PostgreSQL
+│   │   │   │   └── model.go
+│   │   │   └── password/
+│   │   │       └── bcrypt.go
+│   │   ├── migrations/
+│   │   │   ├── 001_create_users.sql
+│   │   │   └── 002_create_sessions.sql
+│   │   ├── Dockerfile
+│   │   ├── go.mod
+│   │   └── README.md
+│   │
+│   └── metadata-service/                 # Video Metadata
+│       ├── cmd/
+│       │   └── main.go
+│       ├── internal/
+│       │   ├── video/
+│       │   │   ├── repository.go
+│       │   │   ├── model.go
+│       │   │   └── service.go
+│       │   └── api/
+│       │       └── handlers.go
+│       ├── migrations/
+│       │   └── 001_create_videos.sql
+│       ├── Dockerfile
+│       ├── go.mod
+│       └── README.md
+│
+├── shared/                               # Shared Libraries
+│   ├── proto/                            # gRPC Protocol Buffers
+│   │   ├── cache/
+│   │   │   └── cache.proto
+│   │   └── metadata/
+│   │       └── metadata.proto
+│   ├── pkg/
+│   │   ├── config/                       # Shared Config Loader
+│   │   │   └── config.go
+│   │   ├── logger/                       # Structured Logger
+│   │   │   └── logger.go
+│   │   ├── metrics/                      # Prometheus Utils
+│   │   │   └── metrics.go
+│   │   ├── tracing/                      # OpenTelemetry
+│   │   │   └── tracer.go
+│   │   └── errors/                       # Custom Error Types
+│   │       └── errors.go
+│   └── go.mod
+│
+├── kubernetes/                           # K8s Manifests
+│   ├── base/                             # Kustomize Base
+│   │   ├── api-gateway/
+│   │   │   ├── deployment.yaml
+│   │   │   ├── service.yaml
+│   │   │   ├── configmap.yaml
+│   │   │   └── hpa.yaml
+│   │   ├── streaming-service/
+│   │   │   ├── deployment.yaml
+│   │   │   ├── service.yaml
+│   │   │   ├── pvc.yaml                  # Cache Volume
+│   │   │   └── hpa.yaml
+│   │   ├── upload-service/
+│   │   │   ├── deployment.yaml
+│   │   │   └── service.yaml
+│   │   ├── ffmpeg-worker/
+│   │   │   └── deployment.yaml           # Job-based
+│   │   ├── cache-index-service/
+│   │   │   ├── deployment.yaml
+│   │   │   ├── service.yaml
+│   │   │   └── redis.yaml                # Redis StatefulSet
+│   │   ├── auth-service/
+│   │   │   ├── deployment.yaml
+│   │   │   ├── service.yaml
+│   │   │   └── secrets.yaml
+│   │   ├── metadata-service/
+│   │   │   ├── deployment.yaml
+│   │   │   └── service.yaml
+│   │   ├── postgres/
+│   │   │   ├── statefulset.yaml
+│   │   │   ├── service.yaml
+│   │   │   └── pvc.yaml
+│   │   └── monitoring/
+│   │       ├── prometheus.yaml
+│   │       ├── grafana.yaml
+│   │       └── servicemonitor.yaml
+│   │
+│   ├── overlays/                         # Kustomize Overlays
+│   │   ├── local/
+│   │   │   └── kustomization.yaml
+│   │   ├── staging/
+│   │   │   ├── kustomization.yaml
+│   │   │   └── patches/
+│   │   │       └── replicas.yaml
+│   │   └── production/
+│   │       ├── kustomization.yaml
+│   │       └── patches/
+│   │           ├── replicas.yaml
+│   │           └── resources.yaml
+│   │
+│   └── helm/                             # Helm Charts (Alternative)
+│       └── streaming-platform/
+│           ├── Chart.yaml
+│           ├── values.yaml
+│           ├── values-staging.yaml
+│           ├── values-production.yaml
+│           └── templates/
+│               ├── api-gateway.yaml
+│               ├── streaming-service.yaml
+│               └── ...
+│
+├── infrastructure/                       # Infrastructure as Code
+│   ├── terraform/
+│   │   ├── modules/
+│   │   │   ├── k8s-cluster/
+│   │   │   │   ├── main.tf
+│   │   │   │   ├── variables.tf
+│   │   │   │   └── outputs.tf
+│   │   │   ├── postgres/
+│   │   │   ├── redis/
+│   │   │   └── storage-box/
+│   │   ├── environments/
+│   │   │   ├── staging/
+│   │   │   │   ├── main.tf
+│   │   │   │   └── terraform.tfvars
+│   │   │   └── production/
+│   │   │       ├── main.tf
+│   │   │       └── terraform.tfvars
+│   │   └── README.md
+│   │
+│   └── ansible/
+│       ├── playbooks/
+│       │   ├── bootstrap-node.yml
+│       │   └── deploy-service.yml
+│       └── inventory/
+│           ├── staging.ini
+│           └── production.ini
+│
+├── scripts/                              # Utility Scripts
+│   ├── dev/
+│   │   ├── start-local.sh                # Start Kind + Services
+│   │   ├── rebuild-all.sh
+│   │   └── port-forward.sh
+│   ├── ci/
+│   │   ├── build-images.sh
+│   │   └── push-images.sh
+│   ├── db/
+│   │   ├── migrate.sh
+│   │   └── seed-data.sh
+│   └── monitoring/
+│       ├── setup-prometheus.sh
+│       └── import-dashboards.sh
+│
+├── docs/                                 # Documentation
+│   ├── architecture/
+│   │   ├── overview.md
+│   │   ├── data-flow.md
+│   │   ├── cache-strategy.md
+│   │   └── diagrams/
+│   │       ├── architecture.drawio
+│   │       └── sequence-diagrams.drawio
+│   ├── api/
+│   │   ├── api-gateway.md
+│   │   ├── streaming-service.md
+│   │   └── openapi.yaml
+│   ├── operations/
+│   │   ├── deployment.md
+│   │   ├── monitoring.md
+│   │   ├── disaster-recovery.md
+│   │   └── runbooks/
+│   │       ├── pod-restart.md
+│   │       └── cache-clear.md
+│   └── development/
+│       ├── setup.md
+│       ├── testing.md
+│       └── contributing.md
+│
+├── tests/                                # Integration & E2E Tests
+│   ├── integration/
+│   │   ├── api_test.go
+│   │   └── streaming_test.go
+│   ├── e2e/
+│   │   ├── upload-to-stream_test.go
+│   │   └── auth-flow_test.go
+│   └── load/
+│       ├── k6/
+│       │   ├── streaming-load.js
+│       │   └── upload-load.js
+│       └── results/
+│
+├── monitoring/                           # Monitoring Configs
+│   ├── prometheus/
+│   │   ├── rules/
+│   │   │   ├── alerts.yaml
+│   │   │   └── recording-rules.yaml
+│   │   └── prometheus.yml
+│   ├── grafana/
+│   │   └── dashboards/
+│   │       ├── overview.json
+│   │       ├── cache-performance.json
+│   │       └── service-health.json
+│   └── loki/
+│       └── loki-config.yaml
+│
+├── configs/                              # Global Configs
+│   ├── local.yaml
+│   ├── staging.yaml
+│   └── production.yaml
+│
+├── .gitignore
+├── .dockerignore
+├── Makefile                              # Build Automation
+├── go.work                               # Go Workspace
+├── docker-compose.yml                    # Local Development
+├── README.md
+└── LICENSE
