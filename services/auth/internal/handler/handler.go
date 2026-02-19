@@ -4,10 +4,12 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strings"
 
-	"github.com/NiklasWillecke/media-platform/services/auth/internal/types"
-	"github.com/NiklasWillecke/media-platform/services/auth/internal/utils"
-	db "github.com/niklaswillecke/streaming-platform/shared/db/generated"
+	"streaming-platform/services/auth/internal/utils"
+	db "streaming-platform/shared/db/generated"
+
+	"streaming-platform/services/auth/internal/types"
 )
 
 type Handler struct {
@@ -39,6 +41,12 @@ func (h *Handler) handlerLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//jwt token generation
+	token, err := utils.CreateJWT(u.UserID)
+	if err != nil {
+		return
+	}
+
+	utils.WriteJSON(w, http.StatusOK, map[string]string{"token": token})
 
 }
 
@@ -79,10 +87,38 @@ func (h *Handler) handlerRegister(w http.ResponseWriter, r *http.Request) {
 	utils.WriteJSON(w, http.StatusCreated, nil)
 }
 
+func (h *Handler) handlerSecret(w http.ResponseWriter, r *http.Request) {
+
+	utils.WriteJSON(w, http.StatusOK, "Hey")
+}
+
+func (h *Handler) withAuth(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		authHeader := r.Header.Get("Authorization")
+		fields := strings.Fields(authHeader)
+		if len(fields) != 2 || strings.ToLower(fields[0]) != "bearer" {
+			http.Error(w, "unauthorized", http.StatusUnauthorized)
+			return
+		}
+
+		tokenString := fields[1]
+		claims, err := utils.ValidateJWT(tokenString)
+		if err != nil {
+			http.Error(w, "invalid or expired token", http.StatusUnauthorized)
+			return
+		}
+
+		ctx := context.WithValue(r.Context(), "userID", claims.ID)
+		next(w, r.WithContext(ctx))
+	}
+}
+
 func (h *Handler) RegisterHandler(r *http.ServeMux) {
-	fmt.Println("Hello")
 
 	r.HandleFunc("/login", h.handlerLogin)
 	r.HandleFunc("/register", h.handlerRegister)
+
+	//Secret test endpoint with auth middleware
+	r.HandleFunc("/secret", h.withAuth(h.handlerSecret))
 
 }

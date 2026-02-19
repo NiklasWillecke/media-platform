@@ -1,5 +1,8 @@
-module github.com/NiklasWillecke/media-platform/services/auth
+module streaming-platform/services/auth
 
 go 1.25.5
 
-require golang.org/x/crypto v0.48.0
+require (
+	github.com/golang-jwt/jwt/v5 v5.3.1
+	golang.org/x/crypto v0.48.0
+)

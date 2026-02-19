@@ -9,8 +9,9 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/NiklasWillecke/media-platform/services/auth/internal/handler"
-	db "github.com/niklaswillecke/streaming-platform/shared/db"
+	db "streaming-platform/shared/db"
+
+	"streaming-platform/services/auth/internal/handler"
 )
 
 func main() {
@@ -23,6 +24,11 @@ func main() {
 
 	dbConn := db.NewDB("postgres://postgres:example@localhost:5432/postgres?sslmode=disable")
 	defer dbConn.Close()
+
+	err := dbConn.Ping(context.Background())
+	if err != nil {
+		log.Fatalf("Cant connect to DB: %v\n", err)
+	}
 
 	handler := handler.NewHandler(dbConn.Q)
 	mux := http.NewServeMux()

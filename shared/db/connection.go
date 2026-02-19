@@ -4,8 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/jackc/pgx/v5/pgxpool"
 	db "streaming-platform/shared/db/generated"
+
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type DB struct {
