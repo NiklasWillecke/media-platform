@@ -9,9 +9,8 @@ import (
 	"syscall"
 	"time"
 
+	"streaming-platform/services/auth/pkg/handler"
 	db "streaming-platform/shared/db"
-
-	"streaming-platform/services/auth/internal/handler"
 )
 
 func main() {
@@ -30,17 +29,20 @@ func main() {
 		log.Fatalf("Cant connect to DB: %v\n", err)
 	}
 
-	handler := handler.NewHandler(dbConn.Q)
+	h := handler.NewHandler(dbConn.Q)
 	mux := http.NewServeMux()
-	handler.RegisterHandler(mux)
+	h.RegisterHandler(mux)
+
+	corsHandler := handler.WithCORS(mux)
 
 	srv := &http.Server{
 		Addr:    ":8080",
-		Handler: mux,
+		Handler: corsHandler,
 	}
 
 	go func() {
 		log.Println("Server is starting...")
+		log.Printf("Server läuft auf http://localhost%s\n", srv.Addr)
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("HTTP server error: %v\n", err)
 		}

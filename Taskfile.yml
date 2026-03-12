@@ -1,0 +1,24 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+
+version: "3"
+
+vars:
+  GREETING: Hello, world!
+
+tasks:
+  default:
+    desc: Print a greeting message
+    cmds:
+      - echo "{{.GREETING}}"
+    silent: true
+
+  start:
+    desc: Start Services
+    cmds:
+      - docker compose up -d
+      - sleep 5
+      - make -C ./shared/db migrate-up
+
+  stop:
+    cmds:
+      - docker compose down

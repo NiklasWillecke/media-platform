@@ -3,5 +3,6 @@ go 1.25.5
 use (
 	./services/api-gateway
 	./services/auth
+	./services/web-frontend
 	./shared/db
 )
