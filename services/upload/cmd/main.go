@@ -34,7 +34,7 @@ func main() {
 
 	client := dataStore.Init(accessKeyID, secretAccessKey, region, endpoint)
 
-	client.CreateBucket("anna")
+	client.CreateBucket("peter")
 
 }
 
