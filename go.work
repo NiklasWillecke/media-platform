@@ -3,6 +3,8 @@ go 1.25.5
 use (
 	./services/api-gateway
 	./services/auth
+	./services/ffmpeg-worker
+	./services/upload
 	./services/web-frontend
 	./shared/db
 )

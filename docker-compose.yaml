@@ -14,3 +14,31 @@ services:
     ports:
       - "4222:4222" # NATS client connection
       - "8222:8222" # NATS monitoring API
+
+  garaged:
+    image: dxflrs/garage:v2.2.0
+
+    container_name: garaged
+    restart: unless-stopped
+    ports:
+      - "3900:3900"
+      - "3901:3901"
+      - "3902:3902"
+      - "3903:3903"
+    volumes:
+      - ./infra/garage.toml:/etc/garage.toml
+
+  valkey:
+    image: valkey/valkey:9.0.3
+    container_name: valkey
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+
+  rustfs:
+    image: rustfs/rustfs:latest-glibc
+    container_name: rustfs
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+      - "9001:9001"

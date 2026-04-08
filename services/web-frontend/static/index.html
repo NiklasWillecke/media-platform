@@ -1,0 +1,270 @@
+<!-- services/frontend/static/index.html -->
+<!doctype html>
+<html lang="de">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Home – StreamingPlatform</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                background: #0f0f0f;
+                color: #fff;
+                font-family:
+                    -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+                min-height: 100vh;
+            }
+
+            .navbar {
+                background: #1a1a1a;
+                border-bottom: 1px solid #2a2a2a;
+                padding: 16px 24px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+            }
+
+            .logo {
+                font-size: 24px;
+                font-weight: 700;
+                color: #e50914;
+            }
+
+            .nav-actions {
+                display: flex;
+                gap: 12px;
+                align-items: center;
+            }
+
+            .btn {
+                padding: 10px 20px;
+                border-radius: 8px;
+                font-size: 14px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.2s;
+                border: none;
+                text-decoration: none;
+                display: inline-block;
+            }
+
+            .btn-primary {
+                background: #e50914;
+                color: #fff;
+            }
+
+            .btn-primary:hover {
+                background: #c4070f;
+            }
+
+            .btn-secondary {
+                background: #2a2a2a;
+                color: #fff;
+                border: 1px solid #3a3a3a;
+            }
+
+            .btn-secondary:hover {
+                background: #3a3a3a;
+            }
+
+            .container {
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 40px 24px;
+            }
+
+            .welcome {
+                text-align: center;
+                margin-bottom: 48px;
+            }
+
+            .welcome h1 {
+                font-size: 36px;
+                font-weight: 700;
+                margin-bottom: 16px;
+            }
+
+            .welcome p {
+                font-size: 18px;
+                color: #999;
+            }
+
+            .action-cards {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                gap: 24px;
+                margin-top: 32px;
+            }
+
+            .action-card {
+                background: #1a1a1a;
+                border: 1px solid #2a2a2a;
+                border-radius: 12px;
+                padding: 32px;
+                text-align: center;
+                transition:
+                    transform 0.2s,
+                    border-color 0.2s;
+            }
+
+            .action-card:hover {
+                transform: translateY(-4px);
+                border-color: #3a3a3a;
+            }
+
+            .action-card-icon {
+                font-size: 48px;
+                margin-bottom: 16px;
+            }
+
+            .action-card h2 {
+                font-size: 20px;
+                font-weight: 600;
+                margin-bottom: 12px;
+            }
+
+            .action-card p {
+                font-size: 14px;
+                color: #999;
+                margin-bottom: 24px;
+            }
+
+            .user-info {
+                color: #999;
+                font-size: 14px;
+            }
+
+            .auth-prompt {
+                text-align: center;
+                padding: 60px 24px;
+            }
+
+            .auth-prompt h2 {
+                font-size: 28px;
+                margin-bottom: 16px;
+            }
+
+            .auth-prompt p {
+                font-size: 16px;
+                color: #999;
+                margin-bottom: 32px;
+            }
+
+            .auth-buttons {
+                display: flex;
+                gap: 16px;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+        </style>
+    </head>
+    <body>
+        <nav class="navbar">
+            <div class="logo">▶ StreamPlatform</div>
+            <div class="nav-actions" id="navActions">
+                <!-- Wird dynamisch befüllt -->
+            </div>
+        </nav>
+
+        <div class="container" id="content">
+            <!-- Wird dynamisch befüllt -->
+        </div>
+
+        <script src="api.js"></script>
+        <script>
+            const token = localStorage.getItem("token");
+            const navActions = document.getElementById("navActions");
+            const content = document.getElementById("content");
+
+            function logout() {
+                localStorage.removeItem("token");
+                window.location.reload();
+            }
+
+            if (token) {
+                // Benutzer ist angemeldet
+                navActions.innerHTML = `
+                    <button class="btn btn-secondary" onclick="logout()">
+                        Abmelden
+                    </button>
+                `;
+
+                content.innerHTML = `
+                    <div class="welcome">
+                        <h1>Willkommen zurück!</h1>
+                        <p>Was möchten Sie heute tun?</p>
+                    </div>
+
+                    <div class="action-cards">
+                        <div class="action-card">
+                            <div class="action-card-icon">📤</div>
+                            <h2>Video hochladen</h2>
+                            <p>
+                                Laden Sie Ihre Videos hoch und teilen Sie sie
+                                mit der Welt
+                            </p>
+                            <a href="/upload" class="btn btn-primary">
+                                Jetzt hochladen
+                            </a>
+                        </div>
+
+                        <div class="action-card">
+                            <div class="action-card-icon">📺</div>
+                            <h2>Videos ansehen</h2>
+                            <p>
+                                Entdecken Sie spannende Inhalte von anderen
+                                Nutzern
+                            </p>
+                            <a href="/browse" class="btn btn-secondary">
+                                Durchsuchen
+                            </a>
+                        </div>
+
+                        <div class="action-card">
+                            <div class="action-card-icon">⚙️</div>
+                            <h2>Profil verwalten</h2>
+                            <p>
+                                Bearbeiten Sie Ihre Einstellungen und
+                                Informationen
+                            </p>
+                            <a href="/profile" class="btn btn-secondary">
+                                Zum Profil
+                            </a>
+                        </div>
+                    </div>
+                `;
+            } else {
+                // Benutzer ist nicht angemeldet
+                navActions.innerHTML = `
+                    <a href="/login" class="btn btn-secondary">Anmelden</a>
+                    <a href="/register" class="btn btn-primary">
+                        Registrieren
+                    </a>
+                `;
+
+                content.innerHTML = `
+                    <div class="auth-prompt">
+                        <h2>Willkommen bei StreamPlatform</h2>
+                        <p>
+                            Melden Sie sich an oder registrieren Sie sich, um
+                            Videos hochzuladen und anzusehen
+                        </p>
+                        <div class="auth-buttons">
+                            <a href="/login" class="btn btn-primary">
+                                Anmelden
+                            </a>
+                            <a href="/register" class="btn btn-secondary">
+                                Registrieren
+                            </a>
+                        </div>
+                    </div>
+                `;
+            }
+        </script>
+    </body>
+</html>

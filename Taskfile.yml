@@ -22,3 +22,7 @@ tasks:
   stop:
     cmds:
       - docker compose down
+
+  garage:
+    cmds:
+      - docker exec -ti garaged /garage status
