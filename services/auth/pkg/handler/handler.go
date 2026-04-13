@@ -119,6 +119,7 @@ func (h *Handler) handlerSecret(w http.ResponseWriter, r *http.Request) {
 	utils.WriteJSON(w, http.StatusOK, "Hey")
 }
 
+// JWT token based
 func WithAuth1(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		authHeader := r.Header.Get("Authorization")
@@ -140,6 +141,7 @@ func WithAuth1(next http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
+// Cookie based
 func WithAuth(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		cookie, err := r.Cookie("sp_auth")

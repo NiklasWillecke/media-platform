@@ -2,8 +2,8 @@ package dataStore
 
 import (
 	"context"
-	"fmt"
 	"log"
+	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -54,17 +54,19 @@ func (c *S3Service) CreateBucket(name string) {
 	}
 }
 
-func (c *S3Service) CreatePresignedUrl(bucket string, key string) {
+func (c *S3Service) CreatePresignedUrl(bucket string, key string) string {
 	presignResult, err := c.Presigner.PresignPutObject(context.TODO(), &s3.PutObjectInput{
 		Bucket: aws.String(bucket),
 		Key:    aws.String(key),
 	})
 
+	s3.WithPresignExpires(15 * time.Minute)
+
 	if err != nil {
 		panic("Couldn't get presigned URL for PutObject")
 	}
 
-	fmt.Printf("Presigned URL For object: %s\n", presignResult.URL)
+	return presignResult.URL
 }
 
 /*
